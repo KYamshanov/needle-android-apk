@@ -1,24 +1,23 @@
 package ru.undframe.needle.utils;
 
+import android.util.Base64;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class FileProperties implements Properties{
 
     private Map<String, String> properties;
     private File file;
-
-    private Base64.Decoder decoder = Base64.getDecoder();
-    private Base64.Encoder encoder = Base64.getEncoder();
 
     public FileProperties(File file) {
 
@@ -36,7 +35,7 @@ public class FileProperties implements Properties{
                 List<String> strings = Files.readAllLines(file.toPath(), Charset.defaultCharset());
                 for (String string : strings) {
 
-                    String decodeString = new String(decoder.decode(string.getBytes()));
+                    String decodeString = new String(Base64.decode(string.getBytes(),Base64.DEFAULT));
                     String[] property = decodeString.split("=", 2);
                     if (property.length == 2)
                         propertyMap.put(property[0], property[1]);
@@ -61,8 +60,8 @@ public class FileProperties implements Properties{
     }
 
     @Override
-    public Optional<String> getValue(String key) {
-        return Optional.ofNullable(properties.getOrDefault(key, null));
+    public String getValue(@NotNull String key) {
+        return properties.containsKey("key")? properties.get(key):null;
     }
 
     @Override
@@ -71,7 +70,7 @@ public class FileProperties implements Properties{
         PrintWriter pwOb = new PrintWriter(fwOb, false);
 
         for (Map.Entry<String, String> entry : properties.entrySet()) {
-            pwOb.println(new String(encoder.encode((entry.getKey() + "=" + entry.getValue()).getBytes())));
+            pwOb.println(new String(Base64.encode((entry.getKey() + "=" + entry.getValue()).getBytes(),Base64.DEFAULT)));
         }
         pwOb.flush();
         pwOb.close();

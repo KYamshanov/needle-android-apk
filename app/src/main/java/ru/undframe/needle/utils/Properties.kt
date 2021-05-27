@@ -1,12 +1,11 @@
-package ru.undframe.needle.utils;
+package ru.undframe.needle.utils
 
-import java.io.IOException;
-import java.util.Optional;
+import java.io.IOException
 
-public interface Properties {
-    void setProperties(String key, String value);
+interface Properties {
+    fun setProperties(key: String, value: String)
+    fun getValue(key: String): String?
 
-    Optional<String> getValue(String key);
-
-    void save() throws IOException;
+    @Throws(IOException::class)
+    fun save()
 }

@@ -39,7 +39,7 @@ public class UploadFileTask extends AsyncTask<Void, Void, Integer> {
 
 
 
-                String requestUrl = "http://" + GlobalProperties.SERVER_ADDRESS + "/uploadfile";
+                String requestUrl = "http://" + GlobalProperties.INSTANCE.getServerAddress() + "/uploadfile";
                 MultipartUtility multipart = new MultipartUtility(requestUrl, Charset.defaultCharset().name());
 
                 if(file!=null)
