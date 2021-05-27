@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">needle</string>
+    <string name="login">Ваш логин</string>
+    <string name="password">Ваш пароль</string>
 </resources>

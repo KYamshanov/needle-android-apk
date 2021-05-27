@@ -1,26 +1,36 @@
 package ru.undframe.needle
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import ru.undframe.needle.mvp.MainPresenter
-import ru.undframe.needle.mvp.MainView
-import ru.undframe.needle.mvp.Presenter
+import ru.undframe.needle.presenters.MainPresenter
+import ru.undframe.needle.utils.GlobalProperties
+import ru.undframe.needle.utils.RawProperties
+import ru.undframe.needle.view.CreatePhotoActivity
+import ru.undframe.needle.view.MainView
 
 
-class MainActivity : AppCompatActivity(),MainView {
+class MainActivity : AppCompatActivity(), MainView {
+
+    private val PERMISSION_CALL = 127
 
 
     private lateinit var cameraButton:ImageButton;
 
-    private lateinit var presenter:Presenter
+    private lateinit var presenter:MainPresenter
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,25 +47,56 @@ class MainActivity : AppCompatActivity(),MainView {
 
         cameraButton.setOnClickListener{
             clickOnCameraButton()
-            onClickPhoto(it)
         }
 
-
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            makeCall()
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA
+                ),
+                PERMISSION_CALL
+            )
+        }
     }
 
-    val TYPE_PHOTO = 1
-    val TYPE_VIDEO = 2
 
-    val REQUEST_CODE_PHOTO = 1
-    val REQUEST_CODE_VIDEO = 2
-
-    fun onClickPhoto(view: View) {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-      /*  intent.putExtra(MediaStore.EXTRA_OUTPUT, generateFileUri(TYPE_PHOTO))
-        registerForActivityResult()*/
-        startActivityForResult(intent, REQUEST_CODE_PHOTO)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_CALL) {
+            var access = true
+            for (grantResult in grantResults) {
+                access = access and (grantResult == PackageManager.PERMISSION_GRANTED)
+            }
+            if (access) makeCall()
+        }
     }
 
+    fun makeCall(){
+        val rawProperties =
+            RawProperties(resources.openRawResource(R.raw.application)) // getting XML
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            rawProperties.getValue("server").ifPresent { s -> GlobalProperties.SERVER_ADDRESS = s }
+            rawProperties.getValue("ksite").ifPresent { s -> GlobalProperties.KSITE_ADDRESS = s }
+        }
+    }
 
     class MainAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -75,14 +116,15 @@ class MainActivity : AppCompatActivity(),MainView {
     }
 
     class ViewHolder(view:View) : RecyclerView.ViewHolder(view) {
-
-
-
     }
 
     override fun clickOnCameraButton() {
-        presenter.openCamera()
+        startActivity(Intent(this, CreatePhotoActivity::class.java))
     }
+
+
+
+
 
 }
 

@@ -1,4 +1,4 @@
-package ru.undframe.needle.mvp;
+package ru.undframe.needle.view;
 
 public interface MainView {
 
