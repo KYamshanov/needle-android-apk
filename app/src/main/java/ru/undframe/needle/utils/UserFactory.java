@@ -35,7 +35,9 @@ public class UserFactory {
     }
 
 
-    public void authCurrentUser(String user, String password, boolean savePassword, NCustomer<User> action) {
+
+
+    public void authCurrentUser(String user, String password, boolean savePassword, NConsumer<User> action) {
         try {
             SecretKeySpec aesKey = new SecretKeySpec(Base64.decode(SimpleCipher.PASSWORD_CIPHER_KEY.getBytes(),Base64.DEFAULT), "AES");
             Cipher cipher = Cipher.getInstance("AES");
@@ -64,7 +66,7 @@ public class UserFactory {
         }
     }
 
-    public void refreshCurrentUser(NCustomer<User> action) {
+    public void refreshCurrentUser(NConsumer<User> action) {
         if (currentUser != null && currentUser.getRefreshToken() != null) {
             new RefreshTokenTask(currentUser.getRefreshToken(), currentUser.getId(), u -> {
                 setCurrentUser(u);
@@ -90,7 +92,7 @@ public class UserFactory {
         }
     }
 
-    public void refreshSavedUser(NCustomer<User> action) {
+    public void refreshSavedUser(NConsumer<User> action) {
         FileProperties properties = GlobalProperties.INSTANCE.getFileProperties();
         String refreshTokenOptional = properties.getValue("refresh_token");
         String userIdOptional = properties.getValue("user_id");

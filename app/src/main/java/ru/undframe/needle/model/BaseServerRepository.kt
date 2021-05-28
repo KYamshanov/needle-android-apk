@@ -4,11 +4,11 @@ import ru.undframe.needle.tasks.UploadFileTask
 import java.io.File
 
 
-class BaseServerRepository  : ServerRepository{
+class BaseServerRepository: ServerRepository{
 
 
-    override fun sendFileToServer(file:File) {
-        UploadFileTask(file){}.execute()
+    override fun sendFileToServer(token:String,file:File) {
+        UploadFileTask(token,file){}.execute()
     }
 
     companion object {

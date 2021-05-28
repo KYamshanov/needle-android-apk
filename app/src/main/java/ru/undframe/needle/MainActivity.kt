@@ -34,10 +34,9 @@ class MainActivity : AppCompatActivity(), MainView {
     private val PERMISSION_CALL = 127
 
 
-    private lateinit var cameraButton:ImageButton;
+    private lateinit var cameraButton: ImageButton;
 
-    private lateinit var presenter:MainPresenter
-
+    private lateinit var presenter: MainPresenter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +52,7 @@ class MainActivity : AppCompatActivity(), MainView {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = MainAdapter()
 
-        cameraButton.setOnClickListener{
+        cameraButton.setOnClickListener {
             clickOnCameraButton()
         }
 
@@ -109,25 +108,25 @@ class MainActivity : AppCompatActivity(), MainView {
         }
     }
 
-    fun makeCall(){
+    fun makeCall() {
         val rawProperties =
             RawProperties(resources.openRawResource(R.raw.application)) // getting XML
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if(rawProperties.getValue("server")!=null)
-            GlobalProperties.serverAddress = rawProperties.getValue("server")!!
-            if(rawProperties.getValue("ksite")!=null)
+            if (rawProperties.getValue("server") != null)
+                GlobalProperties.serverAddress = rawProperties.getValue("server")!!
+            if (rawProperties.getValue("ksite") != null)
                 GlobalProperties.ksiteAddress = rawProperties.getValue("ksite")!!
         }
 
         GlobalProperties.setFileProperties(FileProperties(File(filesDir, "config.data")))
 
 
-        if(!UserFactory.getInstance().currentUser.authorization)
-        startActivity(Intent(this,AuthorizationView::class.java))
+        if (!UserFactory.getInstance().currentUser.authorization)
+            openAuthorizationView()
 
-        Log.d("START","Ksite ${GlobalProperties.ksiteAddress}")
-        Log.d("START","server ${GlobalProperties.serverAddress}")
+        Log.d("START", "Ksite ${GlobalProperties.ksiteAddress}")
+        Log.d("START", "server ${GlobalProperties.serverAddress}")
 
 
     }
@@ -144,20 +143,21 @@ class MainActivity : AppCompatActivity(), MainView {
         }
 
         override fun getItemCount(): Int {
-           return 5;
+            return 5;
         }
 
     }
 
-    class ViewHolder(view:View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    }
+
+    override fun openAuthorizationView() {
+        startActivity(Intent(this, AuthorizationView::class.java))
     }
 
     override fun clickOnCameraButton() {
         startActivity(Intent(this, CreatePhotoActivity::class.java))
     }
-
-
-
 
 
 }

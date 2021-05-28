@@ -9,12 +9,12 @@ import ru.undframe.needle.utils.GlobalProperties.deviceData
 import ru.undframe.needle.utils.GlobalProperties.ksiteAddress
 import ru.undframe.needle.utils.GlobalProperties.serviceName
 import ru.undframe.needle.utils.MultipartUtility
-import ru.undframe.needle.utils.NCustomer
+import ru.undframe.needle.utils.NConsumer
 
 class RefreshTokenTask(
     private val refreshToken: String,
     private val userId: Long,
-    private val action: NCustomer<User?>
+    private val action: NConsumer<User?>
 ) : AsyncTask<Void?, Void?, User?>() {
 
     override fun doInBackground(vararg params: Void?): User? {

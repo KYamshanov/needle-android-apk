@@ -1,6 +1,6 @@
 package ru.undframe.needle.utils;
 
-public interface NCustomer<T> {
+public interface NConsumer<T> {
 
     void accept(T t);
 

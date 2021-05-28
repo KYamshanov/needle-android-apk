@@ -2,25 +2,21 @@ package ru.undframe.needle.tasks
 
 import android.os.AsyncTask
 import org.json.JSONObject
-import ru.undframe.needle.model.User
 import ru.undframe.needle.utils.GlobalProperties
 import ru.undframe.needle.utils.MultipartUtility
 import ru.undframe.needle.utils.NConsumer
+import ru.undframe.needle.utils.ResponseStatus
 
-class AuthUserTask(
-    private val username: String,
-    private val password: String,
-    private val action: NConsumer<User?>
-) : AsyncTask<Void?, Void?, User?>() {
+class CheckAliveTokenTask(
+    private val token: String,
+    private val action: NConsumer<Int>
+) : AsyncTask<Void?, Void?, Int>() {
 
 
-    override fun doInBackground(vararg voids: Void?): User? {
+    override fun doInBackground(vararg voids: Void?): Int {
         try {
             val requestUrl =
-                "http://" + GlobalProperties.ksiteAddress + "/api/auth?login=" + username +
-                        "&password=" + password +
-                        "&device_id=" + GlobalProperties.deviceData +
-                        "&service_id=" + GlobalProperties.serviceName
+                "http://${GlobalProperties.ksiteAddress}/api/is_alive_token?token=${token}"
             val charset = "UTF-8"
             val multipart = MultipartUtility(requestUrl, charset)
             val response = multipart.finish()
@@ -29,14 +25,14 @@ class AuthUserTask(
                 stringJson.append(s)
             }
             val jsonObject = JSONObject(stringJson.toString())
-            return User.deserialize(jsonObject)
+            return jsonObject.getInt("status")
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return User.getInstance()
+        return ResponseStatus.ERROR
     }
 
-    override fun onPostExecute(result: User?) {
+    override fun onPostExecute(result: Int) {
         super.onPostExecute(result)
         action.accept(result)
     }

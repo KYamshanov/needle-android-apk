@@ -1,5 +1,6 @@
 package ru.undframe.needle.view
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -18,7 +19,7 @@ import ru.undframe.needle.utils.ImageFilePathUtils
 import java.io.File
 
 
-class CreatePhotoActivity : AppCompatActivity() {
+class CreatePhotoActivity : AppCompatActivity(),BaseView {
 
     private val LOG_TAG = "Create image log"
 
@@ -37,7 +38,7 @@ class CreatePhotoActivity : AppCompatActivity() {
         ivPhoto = findViewById(R.id.create_photot_vimgview);
         uploadPhoto = findViewById(R.id.upload_photo)
         createPhotoPresenter = CreatePhotoPresenter(
-            ServerRepository.getBaseInstance()
+            this,ServerRepository.getBaseInstance()
         )
 
         launchCamera()
@@ -82,6 +83,10 @@ class CreatePhotoActivity : AppCompatActivity() {
             "MyFolder"
         )
         if (!directory.exists()) directory.mkdirs()
+    }
+
+    override fun openAuthorizationView() {
+        startActivity(Intent(this,AuthorizationView::class.java))
     }
 
 }

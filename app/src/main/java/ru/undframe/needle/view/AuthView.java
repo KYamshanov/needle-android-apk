@@ -1,4 +1,4 @@
 package ru.undframe.needle.view;
 
-public interface AuthView {
+public interface AuthView extends BaseView{
 }

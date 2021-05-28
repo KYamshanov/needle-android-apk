@@ -1,6 +1,6 @@
 package ru.undframe.needle.view;
 
-public interface MainView {
+public interface MainView extends BaseView {
 
     void clickOnCameraButton();
 

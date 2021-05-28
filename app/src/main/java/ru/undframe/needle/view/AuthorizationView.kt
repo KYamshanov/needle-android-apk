@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import ru.undframe.needle.MainActivity
 import ru.undframe.needle.R
-import ru.undframe.needle.utils.AuthStatus
+import ru.undframe.needle.utils.ResponseStatus
 import ru.undframe.needle.utils.UserFactory
 
 class AuthorizationView : AppCompatActivity() {
@@ -47,7 +47,7 @@ class AuthorizationView : AppCompatActivity() {
                 password,
                 savePasswordCallback.isChecked
             ) { user ->
-                if (user.authStatus != AuthStatus.SUCCESSFUL_AUTHORIZATION) {
+                if (user.authStatus != ResponseStatus.SUCCESSFUL_AUTHORIZATION) {
                     error.visibility = View.VISIBLE
                 } else
                     startActivity(Intent(this,MainActivity::class.java))

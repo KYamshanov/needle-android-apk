@@ -2,7 +2,7 @@ package ru.undframe.needle.model
 
 import org.json.JSONException
 import org.json.JSONObject
-import ru.undframe.needle.utils.AuthStatus
+import ru.undframe.needle.utils.ResponseStatus
 
 data class User(var id:Long,var username:String,var email:String,var authorization:Boolean,var authStatus: Int,var accessToken:String?,var refreshToken:String?){
 
@@ -21,9 +21,9 @@ data class User(var id:Long,var username:String,var email:String,var authorizati
             var user: User = getInstance()
             try {
                 val authStatus =
-                    if (jsonObject.has("auth_status")) jsonObject.getInt("auth_status") else AuthStatus.ERROR
+                    if (jsonObject.has("auth_status")) jsonObject.getInt("auth_status") else ResponseStatus.ERROR
                 user.authStatus = authStatus
-                if (authStatus == AuthStatus.SUCCESSFUL_AUTHORIZATION) {
+                if (authStatus == ResponseStatus.SUCCESSFUL_AUTHORIZATION) {
                     user.id = jsonObject.getLong("id")
                     user.username = (jsonObject.getString("username"))
                     user.email = (jsonObject.getString("email"))
@@ -43,7 +43,7 @@ data class User(var id:Long,var username:String,var email:String,var authorizati
         fun getInstance(): User {
             val user: User = User(-1, "null", "null", false, -1, null, null)
             user.authorization = false
-            user.authStatus = AuthStatus.NOT_AUTHORIZED
+            user.authStatus = ResponseStatus.NOT_AUTHORIZED
             return user
         }
     }
