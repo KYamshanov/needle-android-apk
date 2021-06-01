@@ -16,6 +16,10 @@ data class User(var id:Long,var username:String,var email:String,var authorizati
         refreshToken = user.refreshToken
     }
 
+    fun isAuthorization():Boolean{
+        return authorization
+    }
+
     companion object {
         fun deserialize(jsonObject: JSONObject): User {
             var user: User = getInstance()

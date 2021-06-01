@@ -1,5 +1,6 @@
 package ru.undframe.needle.view
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -19,39 +20,37 @@ import ru.undframe.needle.utils.ImageFilePathUtils
 import java.io.File
 
 
-class CreatePhotoActivity : AppCompatActivity(),BaseView {
+class SavePhotoActivity : AppCompatActivity(),BaseView {
 
     private val LOG_TAG = "Create image log"
 
 
-    private lateinit var directory: File
     private lateinit var ivPhoto: ImageView;
     private lateinit var createPhotoPresenter: CreatePhotoPresenter
     private lateinit var uploadPhoto: Button
-    private var savedImgFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_photo)
 
-        createDirectory()
+        createPhotoPresenter = CreatePhotoPresenter(
+            this,ServerRepository.baseInstance
+        )
+
         ivPhoto = findViewById(R.id.create_photot_vimgview);
         uploadPhoto = findViewById(R.id.upload_photo)
-        createPhotoPresenter = CreatePhotoPresenter(
-            this,ServerRepository.getBaseInstance()
-        )
+
 
         launchCamera()
 
         uploadPhoto.setOnClickListener {
-            if (savedImgFile != null)
-                createPhotoPresenter.uploadImage(savedImgFile!!)
+                createPhotoPresenter.uploadImage()
         }
 
     }
 
     private fun launchCamera() {
-        val generateFileUri = generateFileUri()
+        val generateFileUri = createPhotoPresenter.generateNewFile()
         registerForActivityResult(ActivityResultContracts.TakePicture()) {
             if (it) {
                 val bitmap =
@@ -62,31 +61,12 @@ class CreatePhotoActivity : AppCompatActivity(),BaseView {
     }
 
 
-    private fun generateFileUri(): Uri? {
-        val file = File(
-            directory.path + "/" + "photo_"
-                    + System.currentTimeMillis() + ".jpg"
-        )
-        savedImgFile = file
-        val imageUri = FileProvider.getUriForFile(
-            this, "ru.undframe.needle.provider", file
-        )
-        Log.d(LOG_TAG, "fileName = $file")
-
-        return imageUri
-    }
-
-    private fun createDirectory() {
-        directory = File(
-            Environment
-                .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-            "MyFolder"
-        )
-        if (!directory.exists()) directory.mkdirs()
-    }
-
     override fun openAuthorizationView() {
         startActivity(Intent(this,AuthorizationView::class.java))
+    }
+
+    override fun getContext(): Context {
+        return this
     }
 
 }

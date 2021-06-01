@@ -1,5 +1,8 @@
 package ru.undframe.needle.utils
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ru.undframe.needle.model.User
 import ru.undframe.needle.tasks.CheckAliveTokenTask
 import ru.undframe.needle.view.BaseView
@@ -11,23 +14,26 @@ class AuthorizationUserTask(private val baseView: BaseView) {
 
     fun execute() {
         try {
-            val currentUser = UserFactory.getInstance().currentUser
+            val currentUser = UserFactory.getInstance().getCurrentUser()
 
             if (currentUser.accessToken != null)
-                CheckAliveTokenTask(currentUser.accessToken!!) { it ->
-                    println("STATUS $it")
-                    if (it == ResponseStatus.TOKEN_IS_ALIVE) {
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    val result = CheckAliveTokenTask(currentUser.accessToken!!).check()
+
+                    if (result == ResponseStatus.TOKEN_IS_ALIVE) {
                         task?.accept(currentUser,currentUser.accessToken)
                     } else {
                         UserFactory.getInstance().refreshCurrentUser {
-                            if (it.authorization)
+                            if (it.isAuthorization())
                                 task?.accept(currentUser,currentUser.accessToken)
                             else
                                 baseView.openAuthorizationView()
                         }
                     }
 
-                }.execute()
+                }
+
             else
                 baseView.openAuthorizationView()
         } catch (e: java.lang.Exception) {

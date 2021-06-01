@@ -1,6 +1,7 @@
 package ru.undframe.needle
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
@@ -24,7 +25,7 @@ import ru.undframe.needle.utils.GlobalProperties
 import ru.undframe.needle.utils.RawProperties
 import ru.undframe.needle.utils.UserFactory
 import ru.undframe.needle.view.AuthorizationView
-import ru.undframe.needle.view.CreatePhotoActivity
+import ru.undframe.needle.view.SavePhotoActivity
 import ru.undframe.needle.view.MainView
 import java.io.File
 
@@ -122,7 +123,7 @@ class MainActivity : AppCompatActivity(), MainView {
         GlobalProperties.setFileProperties(FileProperties(File(filesDir, "config.data")))
 
 
-        if (!UserFactory.getInstance().currentUser.authorization)
+        if (!UserFactory.getInstance().getCurrentUser().authorization)
             openAuthorizationView()
 
         Log.d("START", "Ksite ${GlobalProperties.ksiteAddress}")
@@ -155,8 +156,12 @@ class MainActivity : AppCompatActivity(), MainView {
         startActivity(Intent(this, AuthorizationView::class.java))
     }
 
+    override fun getContext(): Context {
+        return this
+    }
+
     override fun clickOnCameraButton() {
-        startActivity(Intent(this, CreatePhotoActivity::class.java))
+        startActivity(Intent(this, SavePhotoActivity::class.java))
     }
 
 

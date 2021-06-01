@@ -1,15 +1,13 @@
-package ru.undframe.needle.model;
+package ru.undframe.needle.model
 
-import org.jetbrains.annotations.NotNull;
+import ru.undframe.needle.model.BaseServerRepository.Companion.getInstance
+import java.io.File
 
-import java.io.File;
+interface ServerRepository {
+    suspend fun sendFileToServer(token: String, file: File)
 
-public interface ServerRepository {
-
-    void sendFileToServer(@NotNull String token, File file);
-
-    static ServerRepository getBaseInstance(){
-        return BaseServerRepository.Companion.getInstance();
+    companion object {
+        val baseInstance: ServerRepository
+            get() = getInstance()
     }
-
 }

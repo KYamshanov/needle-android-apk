@@ -7,8 +7,8 @@ import java.io.File
 class BaseServerRepository: ServerRepository{
 
 
-    override fun sendFileToServer(token:String,file:File) {
-        UploadFileTask(token,file){}.execute()
+     override suspend fun sendFileToServer(token:String, file:File) {
+        UploadFileTask(token,file).upload()
     }
 
     companion object {

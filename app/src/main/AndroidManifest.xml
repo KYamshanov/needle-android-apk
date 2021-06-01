@@ -23,7 +23,7 @@
         android:theme="@style/Theme.Needle"
         android:usesCleartextTraffic="true">
         <activity android:name=".view.AuthorizationView"></activity>
-        <activity android:name=".view.CreatePhotoActivity" />
+        <activity android:name=".view.SavePhotoActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

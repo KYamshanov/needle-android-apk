@@ -1,90 +1,69 @@
-package ru.undframe.needle.utils;
+package ru.undframe.needle.utils
 
-import android.util.Base64;
+import android.util.Base64
+import java.io.*
+import java.util.*
 
-import org.jetbrains.annotations.NotNull;
+class FileProperties(file: File) : Properties {
+    private val properties: MutableMap<String, String?>
+    private val file: File
+    override fun setProperties(key: String, value: String?) {
+        if (value != null) properties[key] = value else properties.remove(key)
+    }
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+    override fun getValue(key: String): String? {
+        return if (properties.containsKey(key)) properties[key] else null
+    }
 
-public class FileProperties implements Properties{
-
-    private Map<String, String> properties;
-    private File file;
-
-    public FileProperties(File file) {
-
-        Map<String, String> propertyMap = new HashMap<>();
-        this.file = file;
-        this.properties = propertyMap;
-
-        try {
-
-            if (!file.exists())
-                Files.createFile(file.toPath());
-
-
-            try {
-                List<String> strings = Files.readAllLines(file.toPath(), Charset.defaultCharset());
-                for (String string : strings) {
-
-                    String decodeString = new String(Base64.decode(string.getBytes(),Base64.DEFAULT));
-                    String[] property = decodeString.split("=", 2);
-                    if (property.length == 2)
-                        propertyMap.put(property[0], property[1]);
-                }
-            }catch (IllegalArgumentException e){
-                e.printStackTrace();
-                save();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    @Throws(IOException::class)
+    override suspend fun save() {
+        val fwOb = FileWriter(file, false)
+        val pwOb = PrintWriter(fwOb, false)
+        for ((key, value) in properties) {
+            pwOb.println(String(Base64.encode("$key=$value".toByteArray(), Base64.NO_PADDING)).replace("\n",""))
         }
-
-
+        pwOb.flush()
+        pwOb.close()
+        fwOb.close()
     }
 
-    @Override
-    public void setProperties(String key, String value) {
-        if (value != null)
-            properties.put(key, value);
-        else
-            properties.remove(key);
-    }
-
-    @Override
-    public String getValue(@NotNull String key) {
-        return properties.containsKey("key")? properties.get(key):null;
-    }
-
-    @Override
-    public void save() throws IOException {
-        FileWriter fwOb = new FileWriter(file, false);
-        PrintWriter pwOb = new PrintWriter(fwOb, false);
-
-        for (Map.Entry<String, String> entry : properties.entrySet()) {
-            pwOb.println(new String(Base64.encode((entry.getKey() + "=" + entry.getValue()).getBytes(),Base64.DEFAULT)));
-        }
-        pwOb.flush();
-        pwOb.close();
-        fwOb.close();
-    }
-
-    @Override
-    public String toString() {
+    override fun toString(): String {
         return "FileProperties{" +
                 "properties=" + properties +
-                '}';
+                '}'
     }
 
-    public void remove(String key) {
-        properties.remove(key);
+    fun remove(key: String) {
+        properties.remove(key)
+    }
+
+    init {
+        val propertyMap: MutableMap<String, String?> = HashMap()
+        this.file = file
+        properties = propertyMap
+        if (!file.exists()) {
+            file.parentFile?.mkdirs()
+            file.createNewFile()
+        }
+
+        val lines = ArrayList<String>()
+
+        val reader = BufferedReader(InputStreamReader(FileInputStream(file)))
+        try {
+            var readLine: String? = reader.readLine()
+            while (readLine != null) {
+                lines.add(readLine)
+                readLine = reader.readLine()
+            }
+            for (line in lines) {
+                val decodeString = String(Base64.decode(line.toByteArray(), Base64.NO_PADDING))
+                val property = decodeString.split("=", limit = 2).toTypedArray()
+                if (property.size == 2) propertyMap[property[0]] = property[1]
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } finally {
+            reader.close()
+        }
     }
 }

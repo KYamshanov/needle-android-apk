@@ -2,6 +2,7 @@ package ru.undframe.needle.tasks
 
 import android.os.AsyncTask
 import android.os.Build
+import android.util.Log
 import org.json.JSONObject
 import ru.undframe.needle.utils.GlobalProperties.serverAddress
 import ru.undframe.needle.utils.MultipartUtility
@@ -10,8 +11,7 @@ import java.io.IOException
 import java.nio.charset.Charset
 import java.util.function.Consumer
 
-class UploadFileTask(private val accessToken:String,private val file: File, private val action: Consumer<Int>) :
-    AsyncTask<Void?, Void?, Int>() {
+class UploadFileTask(private val accessToken: String, private val file: File) {
     companion object {
         private var emptyFile: File? = null
 
@@ -24,13 +24,9 @@ class UploadFileTask(private val accessToken:String,private val file: File, priv
         }
     }
 
-    override fun doInBackground(vararg params: Void?): Int {
-
-        try {
-            val requestUrl = "http://${serverAddress}/uploadfile?token=${accessToken}"
-
-            println(requestUrl)
-
+    suspend fun upload(): Int? {
+        val requestUrl = "http://${serverAddress}/uploadfile?token=${accessToken}"
+        runCatching {
             val multipart = MultipartUtility(requestUrl, Charset.defaultCharset().name())
             multipart.addFilePart("file", file)
             val response = multipart.finish()
@@ -40,16 +36,7 @@ class UploadFileTask(private val accessToken:String,private val file: File, priv
             }
             val jsonObject = JSONObject(stringJson.toString())
             return jsonObject.getInt("status")
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return 1
-    }
-
-    override fun onPostExecute(result: Int) {
-        super.onPostExecute(result)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            action.accept(result)
-        }
+        }.getOrElse { Log.e("Upload file", "from $requestUrl", it) }
+        return null
     }
 }

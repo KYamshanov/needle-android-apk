@@ -1,26 +1,25 @@
 package ru.undframe.needle.tasks
 
-import android.os.AsyncTask
+import android.util.Log
 import org.json.JSONObject
 import ru.undframe.needle.model.User
 import ru.undframe.needle.utils.GlobalProperties
 import ru.undframe.needle.utils.MultipartUtility
-import ru.undframe.needle.utils.NConsumer
 
 class AuthUserTask(
     private val username: String,
-    private val password: String,
-    private val action: NConsumer<User?>
-) : AsyncTask<Void?, Void?, User?>() {
+    private val password: String
+) {
 
 
-    override fun doInBackground(vararg voids: Void?): User? {
-        try {
+    suspend fun auth(): User {
+
+        runCatching {
             val requestUrl =
-                "http://" + GlobalProperties.ksiteAddress + "/api/auth?login=" + username +
-                        "&password=" + password +
-                        "&device_id=" + GlobalProperties.deviceData +
-                        "&service_id=" + GlobalProperties.serviceName
+                "http://${GlobalProperties.ksiteAddress}/api/auth?login=$username" +
+                        "&password=$password" +
+                        "&device_id=${GlobalProperties.deviceData}" +
+                        "&service_id=${GlobalProperties.serviceName}"
             val charset = "UTF-8"
             val multipart = MultipartUtility(requestUrl, charset)
             val response = multipart.finish()
@@ -30,14 +29,10 @@ class AuthUserTask(
             }
             val jsonObject = JSONObject(stringJson.toString())
             return User.deserialize(jsonObject)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        }.getOrElse {
+            Log.e("Authorization", "auth user task error", it)
+            return User.getInstance()
         }
-        return User.getInstance()
     }
 
-    override fun onPostExecute(result: User?) {
-        super.onPostExecute(result)
-        action.accept(result)
-    }
 }
