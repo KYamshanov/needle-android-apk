@@ -61,4 +61,12 @@ class AuthorizationView : AppCompatActivity(),AuthView {
     override fun getContext(): Context {
         return this
     }
+
+    override fun openNoAccessActivity() {
+        startActivity(Intent(this, NoAccessActivity::class.java))
+    }
+
+    override fun closeActivity() {
+        finish()
+    }
 }

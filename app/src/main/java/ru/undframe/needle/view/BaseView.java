@@ -6,4 +6,7 @@ public interface BaseView {
 
     void openAuthorizationView();
     Context getContext();
+    void openNoAccessActivity();
+    void closeActivity();
+
 }

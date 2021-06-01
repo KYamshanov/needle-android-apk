@@ -14,26 +14,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.undframe.needle.presenters.MainPresenter
-import ru.undframe.needle.utils.FileProperties
-import ru.undframe.needle.utils.GlobalProperties
-import ru.undframe.needle.utils.RawProperties
-import ru.undframe.needle.utils.UserFactory
+import ru.undframe.needle.utils.*
 import ru.undframe.needle.view.AuthorizationView
 import ru.undframe.needle.view.SavePhotoActivity
 import ru.undframe.needle.view.MainView
+import ru.undframe.needle.view.NoAccessActivity
 import java.io.File
+import java.lang.NullPointerException
 
 
 class MainActivity : AppCompatActivity(), MainView {
-
-    private val PERMISSION_CALL = 127
-
 
     private lateinit var cameraButton: ImageButton;
 
@@ -45,6 +42,20 @@ class MainActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_main)
 
         presenter = MainPresenter(this);
+
+        RequestPermission(
+            this,
+            arrayOf(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
+            )
+        ).checkPermissions {
+            allowed = {
+                makeCall()
+            }
+            closeSourceActivity = true
+        }
 
         cameraButton = findViewById(R.id.camera_button)
 
@@ -67,30 +78,6 @@ class MainActivity : AppCompatActivity(), MainView {
 
         GlobalProperties.currentDeviceId = deviceId
         GlobalProperties.ip = ip
-
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            makeCall()
-        } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.CAMERA
-                ),
-                PERMISSION_CALL
-            )
-        }
-
-
     }
 
 
@@ -100,25 +87,18 @@ class MainActivity : AppCompatActivity(), MainView {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_CALL) {
-            var access = true
-            for (grantResult in grantResults) {
-                access = access and (grantResult == PackageManager.PERMISSION_GRANTED)
-            }
-            if (access) makeCall()
-        }
+        RequestPermission.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     fun makeCall() {
         val rawProperties =
-            RawProperties(resources.openRawResource(R.raw.application)) // getting XML
+            RawProperties(resources.openRawResource(R.raw.application))
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (rawProperties.getValue("server") != null)
-                GlobalProperties.serverAddress = rawProperties.getValue("server")!!
-            if (rawProperties.getValue("ksite") != null)
-                GlobalProperties.ksiteAddress = rawProperties.getValue("ksite")!!
-        }
+        if (rawProperties.getValue("server") != null)
+            GlobalProperties.serverAddress = rawProperties.getValue("server")!!
+        if (rawProperties.getValue("ksite") != null)
+            GlobalProperties.ksiteAddress = rawProperties.getValue("ksite")!!
+
 
         GlobalProperties.setFileProperties(FileProperties(File(filesDir, "config.data")))
 
@@ -162,6 +142,14 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun clickOnCameraButton() {
         startActivity(Intent(this, SavePhotoActivity::class.java))
+    }
+
+    override fun openNoAccessActivity() {
+        startActivity(Intent(this, NoAccessActivity::class.java))
+    }
+
+    override fun closeActivity() {
+        finish()
     }
 
 

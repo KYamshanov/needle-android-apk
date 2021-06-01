@@ -22,7 +22,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Needle"
         android:usesCleartextTraffic="true">
-        <activity android:name=".view.AuthorizationView"></activity>
+        <activity android:name=".view.NoAccessActivity"></activity>
+        <activity android:name=".view.AuthorizationView" />
         <activity android:name=".view.SavePhotoActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -42,7 +43,7 @@
             <!-- ressource file to create -->
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"></meta-data>
+                android:resource="@xml/provider_paths" />
         </provider>
     </application>
 

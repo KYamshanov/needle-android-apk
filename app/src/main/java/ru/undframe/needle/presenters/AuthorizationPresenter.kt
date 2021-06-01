@@ -9,6 +9,7 @@ class AuthorizationPresenter(private var view: AuthView) {
     fun uploadFromSave() {
         UserFactory.getInstance().refreshSavedUser {
             view.openMainActivity()
+            view.closeActivity()
         }
     }
 
@@ -20,8 +21,10 @@ class AuthorizationPresenter(private var view: AuthView) {
         ) { user ->
             if (user.authStatus != ResponseStatus.SUCCESSFUL_AUTHORIZATION) {
                 view.showError()
-            } else
+            } else {
                 view.openMainActivity()
+                view.closeActivity()
+            }
         }
     }
 
